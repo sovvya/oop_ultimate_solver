@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!-- Специальный мета-тег для полноэкранного отображения на Apple Watch -->
+<meta name="disabled-adaptations" content="watch">
+<title>ООП C++</title>
+<style>
+  :root {
+    --font-size: 11px;
+    --text-opacity: 0.9;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    background-color: #000000;
+    color: rgba(220, 220, 220, var(--text-opacity));
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    font-size: var(--font-size);
+    line-height: 1.3;
+    padding: 2px 3px 40px 3px;
+    overflow-x: hidden;
+  }
+  /* Верхняя панель управления */
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.92);
+    border-bottom: 1px solid #222;
+    display: flex;
+    justify-content: space-between;
+    gap: 2px;
+    padding: 3px 0;
+    margin-bottom: 4px;
+  }
+  .btn {
+    background: #1a1a1a;
+    color: #aaa;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 4px 5px;
+    font-size: 10px;
+    font-weight: 600;
+    flex: 1;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .btn:active {
+    background: #333;
+    color: #fff;
+  }
+  /* Кнопки выбора класса */
+  details {
+    background: #0a0a0a;
+    border: 1px solid #222;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    overflow: hidden;
+  }
+  summary {
+    background: #141414;
+    color: #4da3ff;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 7px 6px;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary::after {
+    content: "+";
+    color: #666;
+    font-size: 14px;
+  }
+  details[open] > summary {
+    border-bottom: 1px solid #222;
+    background: #1c2836;
+    color: #7abaff;
+  }
+  details[open] > summary::after {
+    content: "−";
+    color: #7abaff;
+  }
+  /* Пояснения и заголовки секций */
+  .note {
+    background: #191508;
+    border-left: 2px solid #d4a017;
+    color: #d4c490;
+    padding: 4px 5px;
+    margin: 4px;
+    font-size: 0.95em;
+    border-radius: 3px;
+  }
+  .sec {
+    background: #1b1b1b;
+    color: #5ce65c;
+    font-weight: 700;
+    padding: 3px 5px;
+    margin-top: 6px;
+    border-top: 1px solid #2c2c2c;
+    border-bottom: 1px solid #2c2c2c;
+    font-size: 0.95em;
+  }
+  /* Блок с кодом без горизонтального скролла */
+  pre {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: var(--font-size);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    padding: 4px 3px;
+    color: rgba(230, 230, 230, var(--text-opacity));
+    tab-size: 2;
+  }
+  .cm {
+    color: #6a9955;
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="btn" onclick="changeFont(-1)">A−</div>
+  <div class="btn" onclick="changeFont(1)">A+</div>
+  <div class="btn" onclick="toggleDim()">☾ Ярк.</div>
+  <div class="btn" onclick="closeAll()">▲ Все</div>
+</div>
+
+<!-- ==================== 1. CIRCLE ==================== -->
+<details>
+  <summary>1. Circle (Круг)</summary>
+  <div class="note">
+    <b>Почему не нужны констр. копирования и деструктор:</b> Нет указателей и динамической памяти (поля double x, y, r лежат в стеке). Стандартного побитового копирования и деструктора компилятора достаточно.
+  </div>
+
+  <div class="sec">Объявление класса Circle</div>
+<pre>#include &lt;iostream&gt;
+#include &lt;cmath&gt;
+using namespace std;
+
+class Circle {
+private:
+  double x, y; <span class="cm">// координаты центра</span>
+  double r;    <span class="cm">// радиус</span>
+
+public:
+  <span class="cm">// Конструктор (заменяет по умолч. и с параметрами)</span>
+  Circle(double _x = 0.0, double _y = 0.0, double _r = 1.0);
+
+  <span class="cm">// Обычные методы</span>
+  void Input();
+  void Output() const;
+  double Area() const;
+  bool IsPointInside(double px, double py) const;
+
+  <span class="cm">// Операции + и += (умножение радиуса на число)</span>
+  Circle operator+(double k) const;
+  Circle&amp; operator+=(double k);
+
+  <span class="cm">// Сравнение (== и !=) по радиусу</span>
+  bool operator==(const Circle&amp; other) const;
+  bool operator!=(const Circle&amp; other) const;
+
+  <span class="cm">// Потоковый ввод &gt;&gt; и вывод &lt;&lt;</span>
+  friend istream&amp; operator&gt;&gt;(istream&amp; in, Circle&amp; c);
+  friend ostream&amp; operator&lt;&lt;(ostream&amp; out, const Circle&amp; c);
+};</pre>
+
+  <div class="sec">Методы вне класса</div>
+<pre><span class="cm">// Конструктор</span>
+Circle::Circle(double _x, double _y, double _r) : x(_x), y(_y) {
+  r = (_r &gt; 0) ? _r : 1.0;
+}
+
+<span class="cm">// Ввод</span>
+void Circle::Input() {
+  cout &lt;&lt; "Введите x, y и r: ";
+  cin &gt;&gt; x &gt;&gt; y &gt;&gt; r;
+}
+
+<span class="cm">// Вывод</span>
+void Circle::Output() const {
+  cout &lt;&lt; "Центр: (" &lt;&lt; x &lt;&lt; ", " &lt;&lt; y &lt;&lt; "), R: " &lt;&lt; r &lt;&lt; endl;
+}
+
+<span class="cm">// Нахождение площади (S = pi * r^2)</span>
+double Circle::Area() const {
+  return 3.141592653589793 * r * r;
+}
+
+<span class="cm">// Попадание точки (px, py) в круг</span>
+bool Circle::IsPointInside(double px, double py) const {
+  return ((px - x)*(px - x) + (py - y)*(py - y)) &lt;= (r * r);
+}</pre>
+
+  <div class="sec">Перегрузка операторов</div>
+<pre><span class="cm">// Оператор + (новый круг с r * k)</span>
+Circle Circle::operator+(double k) const {
+  return Circle(x, y, r * k);
+}
+
+<span class="cm">// Оператор += (меняет текущий круг)</span>
+Circle&amp; Circle::operator+=(double k) {
+  r *= k;
+  return *this;
+}
+
+<span class="cm">// Оператор == (равны, если равны радиусы)</span>
+bool Circle::operator==(const Circle&amp; other) const {
+  return r == other.r;
+}
+
+<span class="cm">// Оператор !=</span>
+bool Circle::operator!=(const Circle&amp; other) const {
+  return r != other.r;
+}
+
+<span class="cm">// Потоковый ввод &gt;&gt; (БЕЗ friend и БЕЗ Circle::)</span>
+istream&amp; operator&gt;&gt;(istream&amp; in, Circle&amp; c) {
+  in &gt;&gt; c.x &gt;&gt; c.y &gt;&gt; c.r;
+  return in;
+}
+
+<span class="cm">// Потоковый вывод &lt;&lt; (БЕЗ friend и БЕЗ Circle::)</span>
+ostream&amp; operator&lt;&lt;(ostream&amp; out, const Circle&amp; c) {
+  out &lt;&lt; "Center(" &lt;&lt; c.x &lt;&lt; ", " &lt;&lt; c.y &lt;&lt; "), R = " &lt;&lt; c.r;
+  return out;
+}</pre>
+</details>
+
+<!-- ==================== 2. FREEVECTOR ==================== -->
+<details>
+  <summary>2. FreeVector (Вектор)</summary>
+  <div class="note">
+    <b>Почему не нужны констр. копирования и деструктор:</b> Нет динамической памяти и указателей (поля double x, y, z). Стандартный конструктор копирования и деструктор работают корректно.
+  </div>
+
+  <div class="sec">Объявление класса FreeVector</div>
+<pre>#include &lt;iostream&gt;
+#include &lt;cmath&gt;
+using namespace std;
+
+class FreeVector {
+private:
+  double x, y, z; <span class="cm">// координаты вектора</span>
+
+public:
+  FreeVector(double _x = 0.0, double _y = 0.0, double _z = 0.0);
+
+  void Input();
+  void Output() const;
+  double Length() const; <span class="cm">// длина вектора</span>
+
+  <span class="cm">// Сумма векторов (+ и +=)</span>
+  FreeVector operator+(const FreeVector&amp; v) const;
+  FreeVector&amp; operator+=(const FreeVector&amp; v);
+
+  <span class="cm">// Разность векторов (- и -=)</span>
+  FreeVector operator-(const FreeVector&amp; v) const;
+  FreeVector&amp; operator-=(const FreeVector&amp; v);
+
+  <span class="cm">// Скалярное произведение (*) -&gt; double!</span>
+  double operator*(const FreeVector&amp; v) const;
+
+  <span class="cm">// Сравнение (== и !=)</span>
+  bool operator==(const FreeVector&amp; v) const;
+  bool operator!=(const FreeVector&amp; v) const;
+
+  <span class="cm">// Потоковый ввод &gt;&gt; и вывод &lt;&lt;</span>
+  friend istream&amp; operator&gt;&gt;(istream&amp; in, FreeVector&amp; v);
+  friend ostream&amp; operator&lt;&lt;(ostream&amp; out, const FreeVector&amp; v);
+};</pre>
+
+  <div class="sec">Методы и операторы вне класса</div>
+<pre><span class="cm">// Конструктор</span>
+FreeVector::FreeVector(double _x, double _y, double _z)
+  : x(_x), y(_y), z(_z) {}
+
+<span class="cm">// Ввод</span>
+void FreeVector::Input() {
+  cin &gt;&gt; x &gt;&gt; y &gt;&gt; z;
+}
+
+<span class="cm">// Вывод</span>
+void FreeVector::Output() const {
+  cout &lt;&lt; "(" &lt;&lt; x &lt;&lt; ", " &lt;&lt; y &lt;&lt; ", " &lt;&lt; z &lt;&lt; ")" &lt;&lt; endl;
+}
+
+<span class="cm">// Длина вектора: sqrt(x^2 + y^2 + z^2)</span>
+double FreeVector::Length() const {
+  return sqrt(x * x + y * y + z * z);
+}
+
+<span class="cm">// Сумма (+)</span>
+FreeVector FreeVector::operator+(const FreeVector&amp; v) const {
+  return FreeVector(x + v.x, y + v.y, z + v.z);
+}
+
+<span class="cm">// Сумма (+=)</span>
+FreeVector&amp; FreeVector::operator+=(const FreeVector&amp; v) {
+  x += v.x; y += v.y; z += v.z;
+  return *this;
+}
+
+<span class="cm">// Разность (-)</span>
+FreeVector FreeVector::operator-(const FreeVector&amp; v) const {
+  return FreeVector(x - v.x, y - v.y, z - v.z);
+}
+
+<span class="cm">// Разность (-=)</span>
+FreeVector&amp; FreeVector::operator-=(const FreeVector&amp; v) {
+  x -= v.x; y -= v.y; z -= v.z;
+  return *this;
+}
+
+<span class="cm">// Скалярное произведение (*)</span>
+double FreeVector::operator*(const FreeVector&amp; v) const {
+  return x * v.x + y * v.y + z * v.z;
+}
+
+<span class="cm">// Сравнение (== и !=)</span>
+bool FreeVector::operator==(const FreeVector&amp; v) const {
+  return (x == v.x) &amp;&amp; (y == v.y) &amp;&amp; (z == v.z);
+}
+
+bool FreeVector::operator!=(const FreeVector&amp; v) const {
+  return !(*this == v);
+}
+
+<span class="cm">// Потоковый ввод &gt;&gt;</span>
+istream&amp; operator&gt;&gt;(istream&amp; in, FreeVector&amp; v) {
+  in &gt;&gt; v.x &gt;&gt; v.y &gt;&gt; v.z;
+  return in;
+}
+
+<span class="cm">// Потоковый вывод &lt;&lt;</span>
+ostream&amp; operator&lt;&lt;(ostream&amp; out, const FreeVector&amp; v) {
+  out &lt;&lt; "(" &lt;&lt; v.x &lt;&lt; ", " &lt;&lt; v.y &lt;&lt; ", " &lt;&lt; v.z &lt;&lt; ")";
+  return out;
+}</pre>
+</details>
+
+<!-- ==================== 3. COMPLEX ==================== -->
+<details>
+  <summary>3. Complex (Комплексное)</summary>
+  <div class="note">
+    <b>Почему не нужны констр. копирования и деструктор:</b> Поля double x, y не находятся в динамической памяти. Достаточно стандартного конструктора копирования и деструктора по умолчанию.
+  </div>
+
+  <div class="sec">Объявление класса Complex</div>
+<pre>#include &lt;iostream&gt;
+#include &lt;cmath&gt;
+using namespace std;
+
+class Complex {
+private:
+  double x; <span class="cm">// действительная часть (Re)</span>
+  double y; <span class="cm">// мнимая часть (Im)</span>
+
+public:
+  Complex(double _x = 0.0, double _y = 0.0);
+
+  void Input();
+  void Output() const;
+  double Modulus() const;    <span class="cm">// модуль</span>
+  Complex Conjugate() const; <span class="cm">// сопряженное (x - iy)</span>
+
+  <span class="cm">// Арифметические операции</span>
+  Complex operator+(const Complex&amp; c) const;
+  Complex&amp; operator+=(const Complex&amp; c);
+
+  Complex operator-(const Complex&amp; c) const;
+  Complex&amp; operator-=(const Complex&amp; c);
+
+  Complex operator*(const Complex&amp; c) const;
+  Complex&amp; operator*=(const Complex&amp; c);
+
+  Complex operator/(const Complex&amp; c) const;
+  Complex&amp; operator/=(const Complex&amp; c);
+
+  <span class="cm">// Сравнение</span>
+  bool operator==(const Complex&amp; c) const;
+  bool operator!=(const Complex&amp; c) const;
+
+  <span class="cm">// Потоки &gt;&gt; и &lt;&lt;</span>
+  friend istream&amp; operator&gt;&gt;(istream&amp; in, Complex&amp; c);
+  friend ostream&amp; operator&lt;&lt;(ostream&amp; out, const Complex&amp; c);
+};</pre>
+
+  <div class="sec">Методы и операторы вне класса</div>
+<pre><span class="cm">// Конструктор</span>
+Complex::Complex(double _x, double _y) : x(_x), y(_y) {}
+
+void Complex::Input() { cin &gt;&gt; x &gt;&gt; y; }
+
+void Complex::Output() const {
+  if (y &gt;= 0) cout &lt;&lt; x &lt;&lt; " + " &lt;&lt; y &lt;&lt; "i" &lt;&lt; endl;
+  else cout &lt;&lt; x &lt;&lt; " - " &lt;&lt; -y &lt;&lt; "i" &lt;&lt; endl;
+}
+
+<span class="cm">// Модуль: sqrt(x^2 + y^2)</span>
+double Complex::Modulus() const {
+  return sqrt(x * x + y * y);
+}
+
+<span class="cm">// Комплексно-сопряженное</span>
+Complex Complex::Conjugate() const {
+  return Complex(x, -y);
+}
+
+<span class="cm">// Сложение (+ и +=)</span>
+Complex Complex::operator+(const Complex&amp; c) const {
+  return Complex(x + c.x, y + c.y);
+}
+Complex&amp; Complex::operator+=(const Complex&amp; c) {
+  x += c.x; y += c.y;
+  return *this;
+}
+
+<span class="cm">// Вычитание (- и -=)</span>
+Complex Complex::operator-(const Complex&amp; c) const {
+  return Complex(x - c.x, y - c.y);
+}
+Complex&amp; Complex::operator-=(const Complex&amp; c) {
+  x -= c.x; y -= c.y;
+  return *this;
+}
+
+<span class="cm">// Умножение (* и *=)</span>
+Complex Complex::operator*(const Complex&amp; c) const {
+  return Complex(x*c.x - y*c.y, x*c.y + y*c.x);
+}
+Complex&amp; Complex::operator*=(const Complex&amp; c) {
+  double tempX = x*c.x - y*c.y;
+  y = x*c.y + y*c.x;
+  x = tempX;
+  return *this;
+}
+
+<span class="cm">// Деление (/ и /=)</span>
+Complex Complex::operator/(const Complex&amp; c) const {
+  double d = c.x*c.x + c.y*c.y;
+  return Complex((x*c.x + y*c.y)/d, (y*c.x - x*c.y)/d);
+}
+Complex&amp; Complex::operator/=(const Complex&amp; c) {
+  double d = c.x*c.x + c.y*c.y;
+  double tempX = (x*c.x + y*c.y)/d;
+  y = (y*c.x - x*c.y)/d;
+  x = tempX;
+  return *this;
+}
+
+<span class="cm">// Сравнение (== и !=)</span>
+bool Complex::operator==(const Complex&amp; c) const {
+  return (x == c.x) &amp;&amp; (y == c.y);
+}
+bool Complex::operator!=(const Complex&amp; c) const {
+  return !(*this == c);
+}
+
+<span class="cm">// Потоковый ввод &gt;&gt; и вывод &lt;&lt;</span>
+istream&amp; operator&gt;&gt;(istream&amp; in, Complex&amp; c) {
+  in &gt;&gt; c.x &gt;&gt; c.y;
+  return in;
+}
+ostream&amp; operator&lt;&lt;(ostream&amp; out, const Complex&amp; c) {
+  if (c.y &gt;= 0) out &lt;&lt; c.x &lt;&lt; "+" &lt;&lt; c.y &lt;&lt; "i";
+  else out &lt;&lt; c.x &lt;&lt; c.y &lt;&lt; "i";
+  return out;
+}</pre>
+</details>
+
+<!-- ==================== 4. ARRAY ==================== -->
+<details>
+  <summary>4. Array (Массив - все 17 п.)</summary>
+
+  <div class="sec">Объявление класса Array</div>
+<pre>#include &lt;iostream&gt;
+#include &lt;cstdlib&gt;
+using namespace std;
+
+class Array {
+private:
+  int* arr; <span class="cm">// указатель на динамический массив</span>
+  int n;    <span class="cm">// число элементов массива</span>
+
+public:
+  <span class="cm">// Конструкторы и деструктор</span>
+  Array(int n_ = 0);
+  Array(const int* a, int n_);
+  Array(const Array&amp; other);
+  ~Array();
+
+  <span class="cm">// Методы</span>
+  void Input();
+  void Output() const;
+  void Random(int minVal = 0, int maxVal = 100);
+
+  int FindKey(int key) const; <span class="cm">// индекс или -1</span>
+  int MaxIndex() const;       <span class="cm">// индекс max</span>
+  int MinIndex() const;       <span class="cm">// индекс min</span>
+
+  <span class="cm">// Добавление ключа на позицию pos</span>
+  void AddPos(int key, int pos);           <span class="cm">// меняет текущий</span>
+  Array AddPosNew(int key, int pos) const; <span class="cm">// создает новый</span>
+
+  <span class="cm">// Удаление элемента с позиции pos</span>
+  void DelPos(int pos);           <span class="cm">// меняет текущий</span>
+  Array DelPosNew(int pos) const; <span class="cm">// создает новый</span>
+
+  <span class="cm">// Перегрузка операторов</span>
+  Array&amp; operator=(const Array&amp; other);
+  int&amp; operator[](int index);
+
+  Array operator+(int key) const;   <span class="cm">// + ключ в конец</span>
+  Array&amp; operator+=(int key);       <span class="cm">// += ключ в конец</span>
+
+  Array operator+(const Array&amp; other) const; <span class="cm">// + массив</span>
+  Array&amp; operator+=(const Array&amp; other);     <span class="cm">// += массив</span>
+
+  Array operator-(int key) const;   <span class="cm">// - удаление 1-го key</span>
+  Array&amp; operator-=(int key);       <span class="cm">// -= удаление 1-го key</span>
+
+  bool operator==(const Array&amp; other) const;
+  bool operator!=(const Array&amp; other) const;
+
+  friend istream&amp; operator&gt;&gt;(istream&amp; in, Array&amp; a);
+  friend ostream&amp; operator&lt;&lt;(ostream&amp; out, const Array&amp; a);
+};</pre>
+
+  <div class="sec">1-4. Конструкторы и деструктор</div>
+<pre><span class="cm">// 1. Конструктор с размером</span>
+Array::Array(int n_) {
+  n = (n_ &gt; 0) ? n_ : 0;
+  if (n &gt; 0) {
+    arr = new int[n];
+    for (int i = 0; i &lt; n; i++) arr[i] = 0;
+  } else arr = nullptr;
+}
+
+<span class="cm">// 2. Перевод обычного массива в Array</span>
+Array::Array(const int* a, int n_) {
+  n = (n_ &gt; 0) ? n_ : 0;
+  if (n &gt; 0) {
+    arr = new int[n];
+    for (int i = 0; i &lt; n; i++) arr[i] = a[i];
+  } else arr = nullptr;
+}
+
+<span class="cm">// 3. Конструктор копирования</span>
+Array::Array(const Array&amp; other) {
+  n = other.n;
+  if (n &gt; 0) {
+    arr = new int[n];
+    for (int i = 0; i &lt; n; i++) arr[i] = other.arr[i];
+  } else arr = nullptr;
+}
+
+<span class="cm">// 4. Деструктор</span>
+Array::~Array() {
+  delete[] arr;
+}</pre>
+
+  <div class="sec">5-8. Ввод/Вывод, Random, FindKey, Max/Min</div>
+<pre><span class="cm">// 5. Ввод и вывод</span>
+void Array::Input() {
+  for (int i = 0; i &lt; n; i++) cin &gt;&gt; arr[i];
+}
+void Array::Output() const {
+  for (int i = 0; i &lt; n; i++) cout &lt;&lt; arr[i] &lt;&lt; " ";
+  cout &lt;&lt; endl;
+}
+
+<span class="cm">// 6. Случайный массив</span>
+void Array::Random(int minVal, int maxVal) {
+  for (int i = 0; i &lt; n; i++)
+    arr[i] = minVal + rand() % (maxVal - minVal + 1);
+}
+
+<span class="cm">// 7. Поиск ключа (индекс или -1)</span>
+int Array::FindKey(int key) const {
+  for (int i = 0; i &lt; n; i++) {
+    if (arr[i] == key) return i;
+  }
+  return -1;
+}
+
+<span class="cm">// 8. Индекс max и min элемента</span>
+int Array::MaxIndex() const {
+  if (n == 0) return -1;
+  int maxIdx = 0;
+  for (int i = 1; i &lt; n; i++)
+    if (arr[i] &gt; arr[maxIdx]) maxIdx = i;
+  return maxIdx;
+}
+
+int Array::MinIndex() const {
+  if (n == 0) return -1;
+  int minIdx = 0;
+  for (int i = 1; i &lt; n; i++)
+    if (arr[i] &lt; arr[minIdx]) minIdx = i;
+  return minIdx;
+}</pre>
+
+  <div class="sec">9-10. Добавление/Удаление позиции (AddPos / DelPos)</div>
+<pre><span class="cm">// 9. Добавление ключа на позицию pos (меняет текущий)</span>
+void Array::AddPos(int key, int pos) {
+  if (pos &lt; 0 || pos &gt; n) return;
+  int* temp = new int[n + 1];
+  for (int i = 0; i &lt; pos; i++) temp[i] = arr[i];
+  temp[pos] = key;
+  for (int i = pos; i &lt; n; i++) temp[i + 1] = arr[i];
+  delete[] arr;
+  arr = temp;
+  n++;
+}
+
+<span class="cm">// Добавление на позицию pos (новый объект)</span>
+Array Array::AddPosNew(int key, int pos) const {
+  Array res(*this);
+  res.AddPos(key, pos);
+  return res;
+}
+
+<span class="cm">// 10. Удаление позиции pos (меняет текущий)</span>
+void Array::DelPos(int pos) {
+  if (pos &lt; 0 || pos &gt;= n) return;
+  if (n == 1) {
+    delete[] arr; arr = nullptr; n = 0;
+    return;
+  }
+  int* temp = new int[n - 1];
+  int j = 0;
+  for (int i = 0; i &lt; n; i++) {
+    if (i != pos) temp[j++] = arr[i];
+  }
+  delete[] arr;
+  arr = temp;
+  n--;
+}
+
+<span class="cm">// Удаление позиции pos (создается новый объект)</span>
+Array Array::DelPosNew(int pos) const {
+  if (pos &lt; 0 || pos &gt;= n) return *this;
+  Array res(n - 1);
+  int j = 0;
+  for (int i = 0; i &lt; n; i++) {
+    if (i != pos) res.arr[j++] = arr[i];
+  }
+  return res;
+}</pre>
+
+  <div class="sec">11-17. Перегрузка операторов Array</div>
+<pre><span class="cm">// 11. Оператор присвоения (=)</span>
+Array&amp; Array::operator=(const Array&amp; other) {
+  if (this != &amp;other) {
+    delete[] arr;
+    n = other.n;
+    if (n &gt; 0) {
+      arr = new int[n];
+      for (int i = 0; i &lt; n; i++) arr[i] = other.arr[i];
+    } else arr = nullptr;
+  }
+  return *this;
+}
+
+<span class="cm">// 12. Индексация ([])</span>
+int&amp; Array::operator[](int index) {
+  return arr[index];
+}
+
+<span class="cm">// 13. += и + (добавление ключа key в конец)</span>
+Array&amp; Array::operator+=(int key) {
+  int* temp = new int[n + 1];
+  for (int i = 0; i &lt; n; i++) temp[i] = arr[i];
+  temp[n] = key;
+  delete[] arr;
+  arr = temp;
+  n++;
+  return *this;
+}
+Array Array::operator+(int key) const {
+  Array res(*this);
+  res += key;
+  return res;
+}
+
+<span class="cm">// 14. += и + (добавление массива Array в конец)</span>
+Array&amp; Array::operator+=(const Array&amp; other) {
+  if (other.n == 0) return *this;
+  int* temp = new int[n + other.n];
+  for (int i = 0; i &lt; n; i++) temp[i] = arr[i];
+  for (int i = 0; i &lt; other.n; i++) temp[n + i] = other.arr[i];
+  delete[] arr;
+  arr = temp;
+  n += other.n;
+  return *this;
+}
+Array Array::operator+(const Array&amp; other) const {
+  Array res(*this);
+  res += other;
+  return res;
+}
+
+<span class="cm">// 15. -= и - (удаление первого вхождения ключа key)</span>
+Array&amp; Array::operator-=(int key) {
+  int pos = FindKey(key);
+  if (pos != -1) DelPos(pos);
+  return *this;
+}
+Array Array::operator-(int key) const {
+  Array res(*this);
+  res -= key;
+  return res;
+}
+
+<span class="cm">// 16. Сравнение (== и !=)</span>
+bool Array::operator==(const Array&amp; other) const {
+  if (n != other.n) return false;
+  for (int i = 0; i &lt; n; i++)
+    if (arr[i] != other.arr[i]) return false;
+  return true;
+}
+bool Array::operator!=(const Array&amp; other) const {
+  return !(*this == other);
+}
+
+<span class="cm">// 17. Потоковый ввод &gt;&gt; и вывод &lt;&lt;</span>
+istream&amp; operator&gt;&gt;(istream&amp; in, Array&amp; a) {
+  for (int i = 0; i &lt; a.n; i++) in &gt;&gt; a.arr[i];
+  return in;
+}
+ostream&amp; operator&lt;&lt;(ostream&amp; out, const Array&amp; a) {
+  for (int i = 0; i &lt; a.n; i++) out &lt;&lt; a.arr[i] &lt;&lt; " ";
+  return out;
+}</pre>
+</details>
+
+<!-- ==================== 5. STRING ==================== -->
+<details>
+  <summary>5. String (Строка)</summary>
+
+  <div class="sec">Объявление класса String</div>
+<pre>#include &lt;iostream&gt;
+#include &lt;cstring&gt;
+using namespace std;
+
+class String {
+private:
+  char* line; <span class="cm">// строка</span>
+  int len;    <span class="cm">// длина строки</span>
+
+public:
+  String(int L = 80);
+  String(const char* s);
+  String(const String&amp; other);
+  ~String();
+
+  String&amp; operator=(const String&amp; other);
+  char&amp; operator[](int index);
+
+  String operator+(const String&amp; other) const; <span class="cm">// конкатенация</span>
+  String&amp; operator+=(const String&amp; other);
+
+  bool operator==(const String&amp; other) const;
+  bool operator!=(const String&amp; other) const;
+
+  friend istream&amp; operator&gt;&gt;(istream&amp; in, String&amp; s);
+  friend ostream&amp; operator&lt;&lt;(ostream&amp; out, const String&amp; s);
+};</pre>
+
+  <div class="sec">Методы и операторы вне класса</div>
+<pre><span class="cm">// 1. Конструктор с длиной L=80</span>
+String::String(int L) {
+  len = (L &gt; 0) ? L : 0;
+  line = new char[len + 1];
+  line[0] = '\0';
+}
+
+<span class="cm">// 2. Конструктор из char*</span>
+String::String(const char* s) {
+  len = strlen(s);
+  line = new char[len + 1];
+  strcpy(line, s);
+}
+
+<span class="cm">// 3. Конструктор копирования</span>
+String::String(const String&amp; other) {
+  len = other.len;
+  line = new char[len + 1];
+  strcpy(line, other.line);
+}
+
+<span class="cm">// 4. Деструктор</span>
+String::~String() {
+  delete[] line;
+}
+
+<span class="cm">// 5. Присвоение (=)</span>
+String&amp; String::operator=(const String&amp; other) {
+  if (this != &amp;other) {
+    delete[] line;
+    len = other.len;
+    line = new char[len + 1];
+    strcpy(line, other.line);
+  }
+  return *this;
+}
+
+<span class="cm">// 6. Индексация ([])</span>
+char&amp; String::operator[](int index) {
+  return line[index];
+}
+
+<span class="cm">// 7. Конкатенация (+)</span>
+String String::operator+(const String&amp; other) const {
+  String res(len + other.len);
+  strcpy(res.line, line);
+  strcat(res.line, other.line);
+  return res;
+}
+
+<span class="cm">// 8. Конкатенация (+=)</span>
+String&amp; String::operator+=(const String&amp; other) {
+  len += other.len;
+  char* temp = new char[len + 1];
+  strcpy(temp, line);
+  strcat(temp, other.line);
+  delete[] line;
+  line = temp;
+  return *this;
+}
+
+<span class="cm">// 9. Сравнение (== и !=)</span>
+bool String::operator==(const String&amp; other) const {
+  return strcmp(line, other.line) == 0;
+}
+bool String::operator!=(const String&amp; other) const {
+  return strcmp(line, other.line) != 0;
+}
+
+<span class="cm">// 10. Потоковый ввод &gt;&gt;</span>
+istream&amp; operator&gt;&gt;(istream&amp; in, String&amp; s) {
+  char buf[256];
+  in &gt;&gt; buf;
+  delete[] s.line;
+  s.len = strlen(buf);
+  s.line = new char[s.len + 1];
+  strcpy(s.line, buf);
+  return in;
+}
+
+<span class="cm">// 11. Потоковый вывод &lt;&lt;</span>
+ostream&amp; operator&lt;&lt;(ostream&amp; out, const String&amp; s) {
+  out &lt;&lt; s.line;
+  return out;
+}</pre>
+</details>
+
+<!-- ==================== 6. STACK<T> ==================== -->
+<details>
+  <summary>6. Stack&lt;T&gt; (Шаблон стека)</summary>
+
+  <div class="sec">Объявление шаблона Stack&lt;T&gt;</div>
+<pre>#include &lt;iostream&gt;
+using namespace std;
+
+template &lt;class T&gt;
+class Stack {
+private:
+  T* arr;  <span class="cm">// массив элементов</span>
+  int max; <span class="cm">// размер массива</span>
+  int n;   <span class="cm">// кол-во реальных элементов</span>
+
+public:
+  Stack(int k = 50);
+  Stack(const Stack&lt;T&gt;&amp; other);
+  ~Stack();
+
+  bool IsEmpty() const;     <span class="cm">// проверка на пустоту</span>
+  bool IsFull() const;      <span class="cm">// проверка на полноту</span>
+  bool Push(const T&amp; item); <span class="cm">// добавить в стек</span>
+  bool Pop(T&amp; item);        <span class="cm">// удалить из стека</span>
+  T Top() const;            <span class="cm">// вершина стека</span>
+
+  Stack&lt;T&gt;&amp; operator=(const Stack&lt;T&gt;&amp; other);
+
+  template &lt;class U&gt;
+  friend ostream&amp; operator&lt;&lt;(ostream&amp; out, const Stack&lt;U&gt;&amp; s);
+};</pre>
+
+  <div class="sec">Методы шаблона вне класса</div>
+<pre><span class="cm">// 1. Конструктор</span>
+template &lt;class T&gt;
+Stack&lt;T&gt;::Stack(int k) {
+  max = (k &gt; 0) ? k : 50;
+  n = 0;
+  arr = new T[max];
+}
+
+<span class="cm">// 2. Конструктор копирования</span>
+template &lt;class T&gt;
+Stack&lt;T&gt;::Stack(const Stack&lt;T&gt;&amp; other) {
+  max = other.max;
+  n = other.n;
+  arr = new T[max];
+  for (int i = 0; i &lt; n; i++) arr[i] = other.arr[i];
+}
+
+<span class="cm">// 3. Деструктор</span>
+template &lt;class T&gt;
+Stack&lt;T&gt;::~Stack() {
+  delete[] arr;
+}
+
+<span class="cm">// 4. Проверка на пустоту</span>
+template &lt;class T&gt;
+bool Stack&lt;T&gt;::IsEmpty() const {
+  return n == 0;
+}
+
+<span class="cm">// 5. Проверка на заполненность</span>
+template &lt;class T&gt;
+bool Stack&lt;T&gt;::IsFull() const {
+  return n == max;
+}
+
+<span class="cm">// 6. Добавить элемент (Push)</span>
+template &lt;class T&gt;
+bool Stack&lt;T&gt;::Push(const T&amp; item) {
+  if (IsFull()) return false;
+  arr[n++] = item;
+  return true;
+}
+
+<span class="cm">// 7. Удалить элемент (Pop)</span>
+template &lt;class T&gt;
+bool Stack&lt;T&gt;::Pop(T&amp; item) {
+  if (IsEmpty()) return false;
+  item = arr[--n];
+  return true;
+}
+
+<span class="cm">// 8. Значение с вершины (Top)</span>
+template &lt;class T&gt;
+T Stack&lt;T&gt;::Top() const {
+  return arr[n - 1];
+}
+
+<span class="cm">// 9. Оператор присвоения (=)</span>
+template &lt;class T&gt;
+Stack&lt;T&gt;&amp; Stack&lt;T&gt;::operator=(const Stack&lt;T&gt;&amp; other) {
+  if (this != &amp;other) {
+    delete[] arr;
+    max = other.max;
+    n = other.n;
+    arr = new T[max];
+    for (int i = 0; i &lt; n; i++) arr[i] = other.arr[i];
+  }
+  return *this;
+}
+
+<span class="cm">// 10. Потоковый вывод &lt;&lt;</span>
+template &lt;class U&gt;
+ostream&amp; operator&lt;&lt;(ostream&amp; out, const Stack&lt;U&gt;&amp; s) {
+  for (int i = 0; i &lt; s.n; i++) out &lt;&lt; s.arr[i] &lt;&lt; " ";
+  return out;
+}</pre>
+</details>
+
+<script>
+  let fontSize = 11;
+  let isDimmed = false;
+
+  function changeFont(delta) {
+    fontSize = Math.min(18, Math.max(8, fontSize + delta));
+    document.documentElement.style.setProperty('--font-size', fontSize + 'px');
+  }
+
+  function toggleDim() {
+    isDimmed = !isDimmed;
+    document.documentElement.style.setProperty('--text-opacity', isDimmed ? '0.45' : '0.92');
+  }
+
+  function closeAll() {
+    document.querySelectorAll('details').forEach(d => d.removeAttribute('open'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
+</body>
+</html>
